@@ -6,7 +6,7 @@ export const routes: Routes = [
         path: 'auth/login',
         loadComponent: () =>
             import('./features/auth/login.component').then(
-                (m)=> m.LoginPageComponent
+                (m)=> m.LoginComponent
             )
     },
     {
@@ -20,7 +20,7 @@ export const routes: Routes = [
         path: '',
         loadComponent: () =>
         import('./features/dashboard/dashboard.component').then(
-            (m) => m.DashboardPageComponent
+            (m) => m.DashboardComponent
         ),
     },
     {
