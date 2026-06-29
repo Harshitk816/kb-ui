@@ -1,0 +1,119 @@
+import { Injectable, computed, inject, signal } from '@angular/core';
+
+import { ApiService } from '../../core/services/api.service';
+import {
+  CreateTaskRequest,
+  CreateTaskResponse,
+  GetTasksResponse,
+  Task,
+} from './tasks.models';
+
+interface TasksState {
+  tasksByBoardId: Record<number, Task[]>;
+  loadingBoardIds: number[];
+  creating: boolean;
+  error: string;
+}
+
+@Injectable({
+  providedIn: 'root',
+})
+export class TasksService {
+  private apiService = inject(ApiService);
+
+  private state = signal<TasksState>({
+    tasksByBoardId: {},
+    loadingBoardIds: [],
+    creating: false,
+    error: '',
+  });
+
+  readonly creating = computed(() => this.state().creating);
+  readonly error = computed(() => this.state().error);
+
+  hasLoadedBoard(boardId: number) {
+    return computed(() => boardId in this.state().tasksByBoardId);
+  }
+
+  tasksForBoard(boardId: number) {
+    return computed(() =>
+      [...(this.state().tasksByBoardId[boardId] || [])].sort(
+        (a, b) => a.position - b.position
+      )
+    );
+  }
+
+  isBoardLoading(boardId: number) {
+    return computed(() => this.state().loadingBoardIds.includes(boardId));
+  }
+
+  loadTasksByBoard(boardId: number) {
+    this.state.update((state) => ({
+      ...state,
+      loadingBoardIds: [...new Set([...state.loadingBoardIds, boardId])],
+      error: '',
+    }));
+
+    this.apiService.get<GetTasksResponse>(`/tasks/board/${boardId}`).subscribe({
+      next: (response) => {
+        this.state.update((state) => ({
+          ...state,
+          tasksByBoardId: {
+            ...state.tasksByBoardId,
+            [boardId]: response.data || [],
+          },
+          loadingBoardIds: state.loadingBoardIds.filter((id) => id !== boardId),
+        }));
+      },
+      error: (err) => {
+        this.state.update((state) => ({
+          ...state,
+          loadingBoardIds: state.loadingBoardIds.filter((id) => id !== boardId),
+          error: err?.error?.message || 'Failed to load tasks',
+        }));
+      },
+    });
+  }
+
+  createTask(payload: CreateTaskRequest, onSuccess?: () => void) {
+    this.state.update((state) => ({
+      ...state,
+      creating: true,
+      error: '',
+    }));
+
+    this.apiService.post<CreateTaskResponse>('/tasks', payload).subscribe({
+      next: (response) => {
+        const newTask = response.data;
+        const currentBoardTasks = this.state().tasksByBoardId[newTask.boardId] || [];
+
+        this.state.update((state) => ({
+          ...state,
+          creating: false,
+          tasksByBoardId: {
+            ...state.tasksByBoardId,
+            [newTask.boardId]: [...currentBoardTasks, newTask],
+          },
+        }));
+
+        onSuccess?.();
+      },
+      error: (err) => {
+        this.state.update((state) => ({
+          ...state,
+          creating: false,
+          error: err?.error?.message || 'Failed to create task',
+        }));
+      },
+    });
+  }
+
+  clearTasks() {
+    this.state.set({
+      tasksByBoardId: {},
+      loadingBoardIds: [],
+      creating: false,
+      error: '',
+    });
+  }
+}

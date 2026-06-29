@@ -1,3 +1,110 @@
-/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
 
-@import 'tailwindcss';
+:root {
+  --bg-app: #0f1117;
+  --bg-app: #0f1117;
+  --bg-surface: #151b23;
+  --bg-surface-2: #1b2430;
+  --bg-surface-3: #243041;
+
+  --border-default: #2d3a4d;
+
+  --text-primary: #e6edf7;
+  --text-secondary: #b7c4d6;
+  --text-muted: #7d8ba1;
+
+  --color-primary: #14b8a6;
+  --color-primary-hover: #0ea596;
+  --color-primary-soft: #0f2f2c;
+
+  --color-accent-green: #84cc16;
+  --color-accent-green-hover: #74b816;
+  --color-accent-green-soft: #243613;
+
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #38bdf8;
+
+  --priority-urgent: #ef4444;
+  --priority-high: #f97316;
+  --priority-medium: #eab308;
+  --priority-low: #94a3b8;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.28);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.36);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 320ms;
+}
+
+html,
+body {
+  background: var(--bg-app);
+  color: var(--text-primary);
+}
+
+
+
+
+.ui-transition {
+  transition:
+    background-color var(--duration-fast) var(--ease-standard),
+    border-color var(--duration-fast) var(--ease-standard),
+    color var(--duration-fast) var(--ease-standard),
+    box-shadow var(--duration-fast) var(--ease-standard),
+    transform var(--duration-fast) var(--ease-standard),
+    opacity var(--duration-fast) var(--ease-standard);
+}
+
+@keyframes modal-fade-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes drawer-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes overlay-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-modal-in {
+  animation: modal-fade-in var(--duration-base) var(--ease-emphasis);
+}
+
+.animate-drawer-in {
+  animation: drawer-slide-in var(--duration-slow) var(--ease-emphasis);
+}
+
+.animate-overlay-in {
+  animation: overlay-fade-in var(--duration-fast) var(--ease-standard);
+}

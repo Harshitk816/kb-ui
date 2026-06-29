@@ -21,13 +21,41 @@ export const routes: Routes = [
         ),
     },
     {
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./core/shell/shell.component').then((m) => m.ShellComponent),
+    children: [
+      {
         path: '',
-        canActivate: [authGuard],
         loadComponent: () =>
-        import('./features/dashboard/dashboard.component').then(
+          import('./features/dashboard/dashboard.component').then(
             (m) => m.DashboardComponent
-        ),
-    },
+          ),
+      },
+    ],
+  },{
+    path: '',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./core/shell/shell.component').then((m) => m.ShellComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.component').then(
+            (m) => m.DashboardComponent
+          ),
+      },
+      {
+        path: 'projects/:projectId',
+        loadComponent: () =>
+          import('./features/projects/project-home.component').then(
+            (m) => m.ProjectHomeComponent
+          ),
+      },
+    ],
+  },
     {
         path: '**',
         redirectTo: '',
