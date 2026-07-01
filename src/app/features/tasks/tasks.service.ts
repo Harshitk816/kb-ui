@@ -5,6 +5,8 @@ import {
   CreateTaskRequest,
   CreateTaskResponse,
   GetTasksResponse,
+  MoveTaskDto,
+  MoveTaskResponse,
   Task,
 } from './tasks.models';
 
@@ -37,9 +39,7 @@ export class TasksService {
 
   tasksForBoard(boardId: number) {
     return computed(() =>
-      [...(this.state().tasksByBoardId[boardId] || [])].sort(
-        (a, b) => a.position - b.position
-      )
+      [...(this.state().tasksByBoardId[boardId] || [])].sort((a, b) => a.position - b.position),
     );
   }
 
@@ -108,6 +108,46 @@ export class TasksService {
     });
   }
 
+  updateTaskLocally(taskId: number, patch: Partial<Task>) {
+    const byBoard = { ...this.state().tasksByBoardId };
+
+    for (const boardId in byBoard) {
+      const idx = byBoard[boardId].findIndex((t) => t.id === taskId);
+
+      if (idx !== -1) {
+        byBoard[boardId] = [...byBoard[boardId]];
+        byBoard[boardId][idx] = this.normalizeTask({
+          ...byBoard[boardId][idx],
+          ...patch,
+        });
+        break;
+      }
+    }
+
+    this.state.update((state) => ({ ...state, tasksByBoardId: byBoard }));
+  }
+
+  snapshotTasks(): Record<number, Task[]> {
+    return JSON.parse(JSON.stringify(this.state().tasksByBoardId));
+  }
+
+  restoreSnapshot(snapshot: Record<number, Task[]>) {
+    this.state.update((state) => ({
+      ...state,
+      tasksByBoardId: snapshot,
+    }));
+  }
+
+  setTasksForBoard(boardId: number, tasks: Task[]) {
+    this.state.update((state) => ({
+      ...state,
+      tasksByBoardId: {
+        ...state.tasksByBoardId,
+        [boardId]: tasks.map((t) => this.normalizeTask(t)),
+      },
+    }));
+  }
+
   clearTasks() {
     this.state.set({
       tasksByBoardId: {},
@@ -116,4 +156,22 @@ export class TasksService {
       error: '',
     });
   }
+
+  private normalizeTask(task: Task): Task {
+    return {
+      ...task,
+      title: task.title?.trim() || 'Untitled task',
+      description: task.description || '',
+      priority: task.priority || 'low',
+      taskStatus: task.taskStatus || 'todo',
+      position: task.position ?? 0,
+      dueDate: task.dueDate || null,
+    };
+  }
+
+  moveTask(taskId: number, payload: MoveTaskDto) {
+    return this.apiService.patch<MoveTaskResponse>(`/tasks/${taskId}/move`, payload);
+  }
+
+  
 }

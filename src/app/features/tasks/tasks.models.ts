@@ -34,3 +34,14 @@ export interface CreateTaskResponse {
   message: string;
   data: Task;
 }
+
+export interface MoveTaskDto {
+  boardId: number;
+  position: number;
+}
+
+export interface MoveTaskResponse {
+  success: boolean;
+  message: string;
+  data: Task;
+}
