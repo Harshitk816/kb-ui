@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgClass, DatePipe } from '@angular/common';
 
 import { Task } from './tasks.models';
@@ -8,8 +8,10 @@ import { Task } from './tasks.models';
   standalone: true,
   imports: [NgClass, DatePipe],
   template: `
-    <div
-      class="ui-transition rounded-md border border-(--border-default) bg-(--bg-surface-2) p-3 shadow-[var(--shadow-sm)] hover:bg-(--bg-surface-3)"
+    <button
+      type="button"
+      class="ui-transition block w-full rounded-md border border-(--border-default) bg-(--bg-surface-2) p-3 text-left shadow-[var(--shadow-sm)] hover:bg-(--bg-surface-3)"
+      (click)="open.emit(task)"
     >
       <div class="flex items-start justify-between gap-3">
         <h4 class="line-clamp-2 text-sm font-medium text-(--text-primary)">
@@ -46,11 +48,12 @@ import { Task } from './tasks.models';
           </span>
         }
       </div>
-    </div>
+    </button>
   `,
 })
 export class TaskCardComponent {
   @Input({ required: true }) task!: Task;
+  @Output() open = new EventEmitter<Task>();
 
   get isOverdue() {
     if (!this.task?.dueDate) return false;
@@ -59,9 +62,7 @@ export class TaskCardComponent {
 
   get statusLabel() {
     const status = this.task?.taskStatus?.trim();
-
     if (!status) return 'todo';
-
     return status.replace(/_/g, ' ');
   }
 

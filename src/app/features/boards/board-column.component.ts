@@ -57,7 +57,6 @@ import { CreateTaskModalComponent } from '../tasks/create-task-modal.component';
     <div
       class="flex w-full shrink-0 flex-col rounded-lg border border-(--border-default) bg-(--bg-surface) shadow-[var(--shadow-sm)] md:w-80"
     >
-      <!-- Column header -->
       <div class="flex items-center justify-between border-b border-(--border-default) px-4 py-3">
         <div class="min-w-0 flex-1">
           <h3 class="truncate text-sm font-semibold text-(--text-primary)">
@@ -72,7 +71,6 @@ import { CreateTaskModalComponent } from '../tasks/create-task-modal.component';
         </span>
       </div>
 
-      <!-- Subheader + Add Task -->
       <div class="flex items-center justify-between px-4 py-2">
         <p class="text-xs text-(--text-muted)">
           {{ tasks.length }} {{ tasks.length === 1 ? 'task' : 'tasks' }}
@@ -86,7 +84,6 @@ import { CreateTaskModalComponent } from '../tasks/create-task-modal.component';
         </button>
       </div>
 
-      <!-- Drop zone -->
       <div
         cdkDropList
         [id]="dropListId"
@@ -108,9 +105,11 @@ import { CreateTaskModalComponent } from '../tasks/create-task-modal.component';
         } @else {
           @for (task of tasks; track task.id) {
             <div cdkDrag [cdkDragData]="task" class="task-card-wrap">
-              <app-task-card [task]="task" />
+              <app-task-card
+                [task]="task"
+                (open)="taskOpen.emit($event)"
+              />
 
-              <!-- Drag placeholder -->
               <div
                 *cdkDragPlaceholder
                 class="h-28 rounded-md border-2 border-dashed border-(--color-primary) bg-(--color-primary-soft) opacity-60"
@@ -139,6 +138,7 @@ export class BoardColumnComponent {
   @Input() connectedDropListIds: string[] = [];
 
   @Output() taskDropped = new EventEmitter<CdkDragDrop<Task[]>>();
+  @Output() taskOpen = new EventEmitter<Task>();
 
   isCreateTaskOpen = signal(false);
 
